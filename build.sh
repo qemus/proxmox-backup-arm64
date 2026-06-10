@@ -429,3 +429,6 @@ if [ ! -e "${PACKAGES}/proxmox-mini-journalreader_${PROXMOX_JOURNALREADER_VER}_$
 else
 	echo "proxmox-mini-journalreader up-to-date"
 fi
+
+# Remove debug symbol packages from output directory.
+rm -f "${PACKAGES}"/*-dbgsym_*.deb "${PACKAGES}"/*.ddeb
