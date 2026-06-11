@@ -564,6 +564,12 @@ resolve_rust_crate_commit() {
   return 1
 }
 
+function is_container() {
+    [ -f /.dockerenv ] ||
+    [ -f /run/.containerenv ] ||
+    grep -qaE '(docker|containerd|kubepods|libpod)' /proc/1/cgroup 2>/dev/null
+}
+
 file_list=()
 function download_release() {
 	version=${1:-latest}
@@ -597,7 +603,13 @@ function download_release() {
 		fi
 
         [[ "$file" == *"dbgsym"* ]] && continue
-		[[ "$file" == "proxmox-kernel-helper"* ]] && continue
+
+        if is_container; then
+            [[ "$file" == proxmox-kernel-* ]] && continue
+			[[ "$file" == "proxmox-backup-meta"* ]] && continue
+	    	[[ "$file" == "proxmox-kernel-helper"* ]] && continue
+		    [[ "$file" == "proxmox-default-kernel"* ]] && continue
+		fi
 
 		file_list+=("${PACKAGES}/${file}")
 	done
