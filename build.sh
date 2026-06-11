@@ -963,6 +963,7 @@ pbs_runtime_debs=(
 )
 
 download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
+download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
 
 PVE_XTERMJS_VER="$(latest_package_version pve pve-xtermjs)"
 
