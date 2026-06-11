@@ -565,7 +565,6 @@ function download_release() {
 		fi
 
         [[ "$file" == *"dbgsym"* ]] && continue
-        [[ "$file" == "proxmox-backup-client"* ]] && continue
 
 		file_list+=("${PACKAGES}/${file}")
 	done
