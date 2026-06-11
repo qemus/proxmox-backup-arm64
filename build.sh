@@ -603,13 +603,13 @@ function download_release() {
 			curl -sSfL "${download_url}" -o "${PACKAGES}/${file}"
 		fi
 
-        [[ "$file" == *"dbgsym"* ]] && continue
+        [[ "$file" == *"dbgsym"* ]] && rm "${PACKAGES}/${file}" && continue
 
         if is_container; then
-            [[ "$file" == proxmox-kernel-* ]] && continue
-			[[ "$file" == "proxmox-backup-meta"* ]] && continue
-	    	[[ "$file" == "proxmox-kernel-helper"* ]] && continue
-		    [[ "$file" == "proxmox-default-kernel"* ]] && continue
+            [[ "$file" == proxmox-kernel-* ]] && rm "${PACKAGES}/${file}" && continue
+			[[ "$file" == "proxmox-backup-meta"* ]] && rm "${PACKAGES}/${file}" && continue
+	    	[[ "$file" == "proxmox-kernel-helper"* ]] && rm "${PACKAGES}/${file}" && continue
+		    [[ "$file" == "proxmox-default-kernel"* ]] && rm "${PACKAGES}/${file}" && continue
 		fi
 
 		file_list+=("${PACKAGES}/${file}")
@@ -622,7 +622,9 @@ function install_server() {
 		return 1
 	fi
 
-	${SUDO} apt-get install -y "${file_list[@]}"
+	if ${SUDO} apt-get install -y "${file_list[@]}"; then
+		rm -f -- "${file_list[@]}"
+	fi
 }
 
 SUDO="${SUDO:-sudo -E}"
