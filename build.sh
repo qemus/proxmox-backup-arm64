@@ -709,7 +709,6 @@ done
 
 # Docs are downloaded from the PBS repository below, so never build them locally.
 [[ ${BUILD_PROFILES} =~ nodoc ]] || BUILD_PROFILES=${BUILD_PROFILES}",nodoc"
-
 [ -n "${BUILD_PROFILES}" ] && BUILD_PROFILES="--build-profiles=${BUILD_PROFILES#,}"
 
 if [ ! -d "${PATCHES}" ]; then
@@ -902,6 +901,10 @@ sed -i 's/\(latexmk\|proxmox-widget-toolkit-dev\|python3-sphinx\)/\1:all/' proxm
 sed -i '/patch.crates-io/,/pxar/s/^#//' proxmox-backup/Cargo.toml
 
 patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-build.patch"
+
+# Docs are downloaded from the PBS repository, so do not install locally-built docs.
+sed -i '/^[[:space:]]*$(MAKE) -C docs install[[:space:]]*$/d' proxmox-backup/Makefile
+
 if [ "${BUILD_PACKAGE}" = "client" ]; then
 	sed -i '/proxmox-biome/d' proxmox-backup/debian/control
 	patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-client.patch"
@@ -963,7 +966,6 @@ mv -f "${artifacts[@]}" "${PACKAGES}"
 pbs_runtime_debs=(
   "${PACKAGES}/proxmox-backup-client_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
   "${PACKAGES}/proxmox-backup-server_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
-  "${docs_deb}"
 )
 
 for deb in "${pbs_runtime_debs[@]}"; do
@@ -973,7 +975,10 @@ for deb in "${pbs_runtime_debs[@]}"; do
 	fi
 done
 
-download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
+download_runtime_arch_all_dependencies \
+	"${pbs_runtime_debs[@]}" \
+	"${docs_deb}"
+
 download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
 
 PVE_XTERMJS_VER="$(latest_package_version pve pve-xtermjs)"
