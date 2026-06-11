@@ -40,7 +40,7 @@ jobs:
         uses: action-pack/tag-exists@v1
         id: checkTag
         with: 
-          tag: 'v${{ env.latest_tag }}'         
+          tag: '${{ env.latest_tag }}'         
       -
         name: Finish when found
         run: |
