@@ -597,6 +597,7 @@ function download_release() {
 		fi
 
         [[ "$file" == *"dbgsym"* ]] && continue
+		[[ "$file" == "proxmox-kernel-helper"* ]] && continue
 
 		file_list+=("${PACKAGES}/${file}")
 	done
