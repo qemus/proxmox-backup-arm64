@@ -1,10 +1,10 @@
 # proxmox-backup-arm64
-Script for building Proxmox Backup Server **4.x** for **Debian/Trixie**<br />
+Script for building Proxmox Backup Server **4.x** for ARM64.
 
 At least 4 GB are required for compiling. On devices with low memory, SWAP must be used (see help section).
 
 ## Download pre-built packages
-You can find unoffical debian packages for **Bookworm** or **Trixie** that are created with the build.sh script and github actions at https://github.com/qemus/proxmox-backup-arm64/releases.
+You can find unoffical Debian packages that are created with the build.sh script at [https://github.com/qemus/proxmox-backup-arm64/releases](https://github.com/qemus/proxmox-backup-arm64/releases).
 
 With the script you can also download all files of the latest release at once
 
@@ -43,7 +43,7 @@ The compilation can take several hours.<br />
 After that you can find the finished packages in the folder packages/
 
 ## Build using docker
-You can build arm64 .deb packages using the provided Dockerfile and docker buildx:
+You can build ARM64 .deb packages using the provided Dockerfile and docker buildx:
 
 ```
 docker buildx build -o packages --platform linux/arm64 .
