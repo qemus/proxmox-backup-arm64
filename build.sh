@@ -966,8 +966,8 @@ fi
 mv -f "${artifacts[@]}" "${PACKAGES}"
 
 pbs_runtime_debs=(
-  "${PACKAGES}/proxmox-backup-client_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
-  "${PACKAGES}/proxmox-backup-server_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
+  "${PACKAGES}/proxmox-backup-client_${DEB_VERSION}_${PACKAGE_ARCH}.deb"
+  "${PACKAGES}/proxmox-backup-server_${DEB_VERSION}_${PACKAGE_ARCH}.deb"
 )
 
 for deb in "${pbs_runtime_debs[@]}"; do
@@ -978,7 +978,6 @@ for deb in "${pbs_runtime_debs[@]}"; do
 done
 
 download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
-
 download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
 
 PVE_XTERMJS_VER="$(latest_package_version pve pve-xtermjs)"
