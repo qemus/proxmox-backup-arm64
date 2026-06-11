@@ -21,15 +21,18 @@ jobs:
         name: Get remote package data
         run: |
           set -e -o pipefail
-          latest_tag=$(curl -fsSL http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/Packages.gz | \
-          gzip -dc | awk '/^Package: proxmox-backup$/ {f=1; next} f && /^Version:/ {print $2; exit}')
+          latest_tag=""; 
+          while read -r v; do {
+            [ -z "$latest_tag" ] || dpkg --compare-versions "$v" gt "$latest_tag"; } && latest_tag="$v"
+          done < <(curl -fsSL http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/Packages.gz | \
+                   gzip -dc | awk '/^Package: proxmox-backup$/ {f=1; next} f && /^Version:/ {print $2; f=0}')
+
+          latest_tag="${latest_tag%-*}"
           echo "Found tag: \"${latest_tag}\""
-          latest_version="${latest_tag%-*}"
           major="${latest_version%%.*}"
           minor="${latest_version#*.}"
           minor="${minor%%.*}"
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
-          echo "latest_version=$latest_version" >> $GITHUB_ENV
           echo "latest_minor=$major.$minor" >> $GITHUB_ENV
           echo "latest_major=$major" >> $GITHUB_ENV
       - 
