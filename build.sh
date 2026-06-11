@@ -627,6 +627,7 @@ HOST_SYSTEM=$(dpkg-architecture -q DEB_HOST_GNU_SYSTEM)
 BUILD_PACKAGE="server"
 BUILD_PROFILES=""
 GITHUB_ACTION=""
+packages_install=()
 
 export DEB_HOST_RUST_TYPE=${HOST_CPU}-unknown-${HOST_SYSTEM}
 
@@ -748,7 +749,9 @@ if [ "${BUILD_PACKAGE}" = "server" ]; then
 fi
 
 echo "Install build dependencies"
-${SUDO} apt install -y "${packages_install[@]}"
+if [ "${#packages_install[@]}" -gt 0 ]; then
+	${SUDO} apt install -y "${packages_install[@]}"
+fi
 
 cd "${SOURCES}"
 
@@ -933,8 +936,8 @@ if [ "${BUILD_PACKAGE}" = "client" ]; then
 	exit 0
 fi
 
-# The docs package is Architecture:all, so avoid rebuilding/collecting it from
-# the ARM64 build and download the matching package from the PBS repository.
+# The docs package is for architecture all, so avoid rebuilding/collecting it
+# from the ARM64 build and download the matching package from the PBS repository.
 echo "Downloading docs package..."
 docs_deb="$(download_package_max_upstream_no_deps pbs proxmox-backup-docs "${DEB_VERSION_UPSTREAM}" "${PACKAGES}")"
 if [ ! -s "$docs_deb" ]; then
@@ -960,7 +963,15 @@ mv -f "${artifacts[@]}" "${PACKAGES}"
 pbs_runtime_debs=(
   "${PACKAGES}/proxmox-backup-client_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
   "${PACKAGES}/proxmox-backup-server_${PROXMOX_BACKUP_VER}_${PACKAGE_ARCH}.deb"
+  "${docs_deb}"
 )
+
+for deb in "${pbs_runtime_debs[@]}"; do
+	if [ ! -e "${deb}" ]; then
+		echo "Error: missing runtime package ${deb}" >&2
+		exit 1
+	fi
+done
 
 download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
 download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
