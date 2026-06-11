@@ -644,7 +644,7 @@ while [ "$#" -ge 1 ]; do
 		;;
 	cross*)
 	    if [[ "$1" =~ cross=[0-9.-]+ ]]; then
-			PROXMOX_PB_VER="${1#cross=}"
+			PROXMOX_BACKUP_VER="${1#cross=}"
 		fi
 	
 		PACKAGE_ARCH=arm64
@@ -705,6 +705,10 @@ while [ "$#" -ge 1 ]; do
 	esac
 	shift
 done
+
+# Docs are downloaded from the PBS repository below, so never build them locally.
+[[ ${BUILD_PROFILES} =~ nodoc ]] || BUILD_PROFILES=${BUILD_PROFILES}",nodoc"
+
 [ -n "${BUILD_PROFILES}" ] && BUILD_PROFILES="--build-profiles=${BUILD_PROFILES#,}"
 
 if [ ! -d "${PATCHES}" ]; then
@@ -753,11 +757,16 @@ if [ "${BUILD_PACKAGE}" != "client" ]; then
 	PROXMOX_BIOME_VER="$(latest_package_version devel proxmox-biome)"
 	echo "Using proxmox-biome package version: ${PROXMOX_BIOME_VER}"
 
-	if [ "${HOST_ARCH}" = "amd64" ]; then
+	BIOME_ARCH="${PACKAGE_ARCH}"
+	if [[ "${BUILD_PROFILES}" =~ cross ]]; then
+		BIOME_ARCH="${HOST_ARCH}"
+	fi
+
+	if [ "${BIOME_ARCH}" = "amd64" ]; then
 		download_package devel proxmox-biome "${PROXMOX_BIOME_VER}" "${PACKAGES_BUILD}" || true
 	fi
 
-	if [ ! -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${HOST_ARCH}.deb" ]; then
+	if [ ! -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb" ]; then
 	
 		git_clone_or_fetch https://git.proxmox.com/git/proxmox-biome.git
 		PROXMOX_BIOME_GIT=$(resolve_commit_for_debian_version "${PROXMOX_BIOME_VER}" proxmox-biome proxmox-biome || true)
@@ -772,7 +781,7 @@ if [ "${BUILD_PACKAGE}" != "client" ]; then
 
 		patch -p1 -d proxmox-biome/ <"${PATCHES}/proxmox-biome-build.patch"
 
-		if [ "${HOST_ARCH}" = "arm64" ]; then
+		if [ "${BIOME_ARCH}" = "arm64" ]; then
 			patch -p1 -d proxmox-biome/ <"${PATCHES}/proxmox-biome-arm.patch"
 		fi
 
@@ -781,14 +790,14 @@ if [ "${BUILD_PACKAGE}" != "client" ]; then
 		${SUDO} apt -y build-dep .
 		env -i HOME="${HOME}" TERM="${TERM}" bash -c \
 			'source /etc/profile; source ~/.cargo/env; make deb'
-		mv -f proxmox-biome_${PROXMOX_BIOME_VER}_${HOST_ARCH}.deb "${PACKAGES_BUILD}"
+		mv -f proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb "${PACKAGES_BUILD}"
 		cd ..
 	else
 		echo "proxmox-biome up-to-date"
 	fi
 
-	if [ -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${HOST_ARCH}.deb" ]; then
-		${SUDO} apt install -y "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${HOST_ARCH}.deb"
+	if [ -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb" ]; then
+		${SUDO} apt install -y "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb"
 	else
 		echo "proxmox-biome dependency missing"
 		exit 1
@@ -924,12 +933,19 @@ if [ "${BUILD_PACKAGE}" = "client" ]; then
 	exit 0
 fi
 
+# The docs package is Architecture:all, so avoid rebuilding/collecting it from
+# the ARM64 build and download the matching package from the PBS repository.
+echo "Downloading docs package..."
+docs_deb="$(download_package_max_upstream_no_deps pbs proxmox-backup-docs "${DEB_VERSION_UPSTREAM}" "${PACKAGES}")"
+if [ ! -s "$docs_deb" ]; then
+  echo "Failed to download Docs package!" >&2 && exit 1
+fi
+
 shopt -s nullglob
 artifacts=(
   proxmox-backup-client{,-static}{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
   proxmox-backup-file-restore{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
   proxmox-backup-server{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
-  proxmox-backup-docs_${DEB_VERSION}_all.deb
 )
 shopt -u nullglob
 
@@ -1033,7 +1049,7 @@ PROXMOX_JOURNALREADER_VER="$(cd proxmox-mini-journalreader && dpkg-parsechangelo
 echo "Using proxmox-mini-journalreader package version: ${PROXMOX_JOURNALREADER_VER}"
 
 if [ ! -e "${PACKAGES}/proxmox-mini-journalreader_${PROXMOX_JOURNALREADER_VER}_${PACKAGE_ARCH}.deb" ]; then
-	patch -p1 -d proxmox-mini-journalreader/ <${PATCHES}/proxmox-mini-journalreader.patch
+	patch -p1 -d proxmox-mini-journalreader/ <"${PATCHES}/proxmox-mini-journalreader.patch"
 	[[ "${BUILD_PROFILES}" =~ cross ]] &&
 		patch -p1 -d proxmox-mini-journalreader/ <"${PATCHES}/proxmox-mini-journalreader-cross.patch"
 	cd proxmox-mini-journalreader/
