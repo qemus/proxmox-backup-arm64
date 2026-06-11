@@ -6,15 +6,15 @@ At least 4 GB are required for compiling. On devices with low memory, SWAP must 
 ## Download pre-built packages
 You can find unoffical Debian packages that are created with the build.sh script at [https://github.com/qemus/proxmox-backup-arm64/releases](https://github.com/qemus/proxmox-backup-arm64/releases).
 
-With the script you can also download all files of the latest release at once
+With the script you can also download or install all packages of the latest release automatically.
 
 **Download and install**
 
- `./build.sh install` or a specific version `./build.sh install=4.2.1-1`
+ `./build.sh install` or a specific version `./build.sh install=4.2.1`
 
 **Download only**
 
-`./build.sh download` or a specific version `./build.sh download=4.2.1-1`
+`./build.sh download` or a specific version `./build.sh download=4.2.1`
 
 ## Build manually
 ### Install build essentials and dependencies
@@ -89,17 +89,7 @@ rustup target add aarch64-unknown-linux-gnu
 ## Install all needed packages
 ### Server
 ```
-sudo apt install \
-  ./libjs-extjs_*_all.deb \
-  ./libjs-qrcodejs_*_all.deb \
-  ./libproxmox-acme-plugins_*_all.deb \
-  ./pbs-i18n_*_all.deb \
-  ./proxmox-backup-docs_*_all.deb \
-  ./proxmox-backup-server_*_arm64.deb \
-  ./proxmox-mini-journalreader_*_arm64.deb \
-  ./proxmox-widget-toolkit_*_all.deb \
-  ./proxmox-termproxy_*_arm64.deb \
-  ./pve-xtermjs_*_all.deb
+sudo apt install ./*.deb
 ```
 
 ### Client
