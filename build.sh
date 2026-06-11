@@ -905,6 +905,10 @@ patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-build.patch"
 # Docs are downloaded from the PBS repository, so do not install locally-built docs.
 sed -i '/^[[:space:]]*$(MAKE) -C docs install[[:space:]]*$/d' proxmox-backup/Makefile
 
+# Docs package is downloaded separately, so remove generated manpage installs.
+find proxmox-backup/debian -name '*.install' -exec \
+	sed -i '\#usr/share/man/#d' {} +
+
 if [ "${BUILD_PACKAGE}" = "client" ]; then
 	sed -i '/proxmox-biome/d' proxmox-backup/debian/control
 	patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-client.patch"
