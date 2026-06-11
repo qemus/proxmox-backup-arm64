@@ -722,8 +722,6 @@ while [ "$#" -ge 1 ]; do
 	shift
 done
 
-# Docs are downloaded from the PBS repository below, so never build them locally.
-[[ ${BUILD_PROFILES} =~ nodoc ]] || BUILD_PROFILES=${BUILD_PROFILES}",nodoc"
 [ -n "${BUILD_PROFILES}" ] && BUILD_PROFILES="--build-profiles=${BUILD_PROFILES#,}"
 
 if [ ! -d "${PATCHES}" ]; then
@@ -917,13 +915,6 @@ sed -i '/patch.crates-io/,/pxar/s/^#//' proxmox-backup/Cargo.toml
 
 patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-build.patch"
 
-# Docs are downloaded from the PBS repository, so do not install locally-built docs.
-sed -i '/^[[:space:]]*$(MAKE) -C docs install[[:space:]]*$/d' proxmox-backup/Makefile
-
-# Docs package is downloaded separately, so remove generated manpage installs.
-find proxmox-backup/debian -name '*.install' -exec \
-	sed -i '\#usr/share/man/#d' {} +
-
 if [ "${BUILD_PACKAGE}" = "client" ]; then
 	sed -i '/proxmox-biome/d' proxmox-backup/debian/control
 	patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-client.patch"
@@ -957,20 +948,12 @@ if [ "${BUILD_PACKAGE}" = "client" ]; then
 	mv -f "proxmox-backup-client_${DEB_VERSION}_${PACKAGE_ARCH}.deb" "${PACKAGES}"
 	exit 0
 fi
-
-# The docs package is for architecture all, so avoid rebuilding/collecting it
-# from the ARM64 build and download the matching package from the PBS repository.
-echo "Downloading docs package..."
-docs_deb="$(download_package_max_upstream_no_deps pbs proxmox-backup-docs "${DEB_VERSION_UPSTREAM}" "${PACKAGES}")"
-if [ ! -s "$docs_deb" ]; then
-  echo "Failed to download Docs package!" >&2 && exit 1
-fi
-
 shopt -s nullglob
 artifacts=(
   proxmox-backup-client{,-static}{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
   proxmox-backup-file-restore{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
   proxmox-backup-server{,-dbgsym}_${DEB_VERSION}_${PACKAGE_ARCH}.*
+  proxmox-backup-docs_${DEB_VERSION}_all.deb
 )
 shopt -u nullglob
 
@@ -994,9 +977,7 @@ for deb in "${pbs_runtime_debs[@]}"; do
 	fi
 done
 
-download_runtime_arch_all_dependencies \
-	"${pbs_runtime_debs[@]}" \
-	"${docs_deb}"
+download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
 
 download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
 
