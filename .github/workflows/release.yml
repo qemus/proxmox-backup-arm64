@@ -29,8 +29,8 @@ jobs:
 
           latest_tag="${latest_tag%-*}"
           echo "Found tag: \"${latest_tag}\""
-          major="${latest_version%%.*}"
-          minor="${latest_version#*.}"
+          major="${latest_tag%%.*}"
+          minor="${latest_tag#*.}"
           minor="${minor%%.*}"
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
           echo "latest_minor=$major.$minor" >> $GITHUB_ENV
