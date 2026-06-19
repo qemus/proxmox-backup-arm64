@@ -1,9 +1,0 @@
-ARG baseimage=debian:trixie-slim
-FROM ${baseimage} as builder-stage
-ENV DEBIAN_FRONTEND=noninteractive
-
-COPY . /build/
-WORKDIR /build/packages
-
-RUN ls -l
-RUN apt update && apt-get -y install $(find /build/packages/ -name '*.deb' ! -name '*static*.deb')
