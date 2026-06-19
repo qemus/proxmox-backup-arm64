@@ -10,11 +10,11 @@ With the script you can also download or install all packages of the latest rele
 
 **Download and install**
 
- `./build.sh install` or a specific version `./build.sh install=4.2.1`
+ `./build.sh install` or a specific version `./build.sh install=4.2.2`
 
 **Download only**
 
-`./build.sh download` or a specific version `./build.sh download=4.2.1`
+`./build.sh download` or a specific version `./build.sh download=4.2.2`
 
 ## Build manually
 ### Install build essentials and dependencies
