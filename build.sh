@@ -110,7 +110,6 @@ function download_package_max_upstream_no_deps() {
 	echo "${file}"
 }
 
-
 function download_arch_all_package_satisfying() {
 	repo=${1}
 	package_name=${2}
@@ -250,6 +249,7 @@ function download_runtime_arch_all_dependencies() {
 		done < <(parse_deb_runtime_dependencies "${deb}")
 	done
 }
+
 function dependency_constraint_from_deb() {
 	deb=${1}
 	wanted=${2}
@@ -606,7 +606,7 @@ function download_release() {
         [[ "$file" == *"dbgsym"* ]] && rm "${PACKAGES}/${file}" && continue
 
         if is_container; then
-            [[ "$file" == proxmox-kernel-* ]] && rm "${PACKAGES}/${file}" && continue
+            [[ "$file" == "proxmox-kernel-"* ]] && rm "${PACKAGES}/${file}" && continue
 			[[ "$file" == "proxmox-backup-meta"* ]] && rm "${PACKAGES}/${file}" && continue
 	    	[[ "$file" == "proxmox-kernel-helper"* ]] && rm "${PACKAGES}/${file}" && continue
 		    [[ "$file" == "proxmox-default-kernel"* ]] && rm "${PACKAGES}/${file}" && continue
