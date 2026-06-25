@@ -180,6 +180,9 @@ Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 Enabled: false
 ```
 
+## Stars 🌟
+[![Stargazers](https://raw.githubusercontent.com/star-stats/stars/refs/heads/data/charts/qemus-proxmox-backup-arm64.svg)](https://github.com/dobtc/qemus/proxmox-backup-arm64)
+
 ## Acknowledgements
 
 Special thanks to [wofferl](https://github.com/wofferl), this project would not exist without his invaluable work.
