@@ -181,7 +181,7 @@ Enabled: false
 ```
 
 ## Stars 🌟
-[![Stargazers](https://raw.githubusercontent.com/star-stats/stars/refs/heads/data/charts/qemus-proxmox-backup-arm64.svg)](https://github.com/dobtc/qemus/proxmox-backup-arm64)
+[![Stargazers](https://raw.githubusercontent.com/star-stats/stars/refs/heads/data/charts/qemus-proxmox-backup-arm64.svg)](https://github.com/qemus/proxmox-backup-arm64/stargazers)
 
 ## Acknowledgements
 
