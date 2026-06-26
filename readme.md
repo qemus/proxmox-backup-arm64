@@ -1,4 +1,9 @@
 # proxmox-backup-arm64
+
+[![Build]][build_url]
+[![Version]][release_url]
+[![Size]][release_url]
+
 Script for building Proxmox Backup Server **4.x** for ARM64.
 
 At least 4 GB are required for compiling. On devices with low memory, SWAP must be used (see help section).
@@ -186,3 +191,10 @@ Enabled: false
 ## Acknowledgements
 
 Special thanks to [wofferl](https://github.com/wofferl), this project would not exist without his invaluable work.
+
+[build_url]: https://github.com/qemus/proxmox-backup-arm64/
+[release_url]: https://github.com/qemus/proxmox-backup-arm64/releases/
+
+[Build]: https://github.com/qemus/proxmox-backup-arm64/actions/workflows/release.yml/badge.svg
+[Size]: https://img.shields.io/badge/size-32.8_MB-steelblue?style=flat&color=066da5
+[Version]: https://img.shields.io/github/v/tag/qemus/proxmox-backup-arm64?label=version&sort=semver&color=066da5
