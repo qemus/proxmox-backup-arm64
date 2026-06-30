@@ -1065,7 +1065,6 @@ PROXMOX_JOURNALREADER_VER="$(cd proxmox-mini-journalreader && dpkg-parsechangelo
 echo "Using proxmox-mini-journalreader package version: ${PROXMOX_JOURNALREADER_VER}"
 
 if [ ! -e "${PACKAGES}/proxmox-mini-journalreader_${PROXMOX_JOURNALREADER_VER}_${PACKAGE_ARCH}.deb" ]; then
-	patch -p1 -d proxmox-mini-journalreader/ <"${PATCHES}/proxmox-mini-journalreader.patch"
 	[[ "${BUILD_PROFILES}" =~ cross ]] &&
 		patch -p1 -d proxmox-mini-journalreader/ <"${PATCHES}/proxmox-mini-journalreader-cross.patch"
 	cd proxmox-mini-journalreader/
