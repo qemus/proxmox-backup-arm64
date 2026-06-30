@@ -47,7 +47,7 @@ or
 The compilation can take several hours.<br />
 After that you can find the finished packages in the folder packages/
 
-## Build using docker
+## Build using Docker
 You can build ARM64 .deb packages using the provided Dockerfile and docker buildx:
 
 ```
@@ -60,7 +60,7 @@ You can also set build arguments for base image and build.sh options:
 docker buildx build -o packages --build-arg buildoptions="client debug" --build-arg baseimage=ubuntu:jammy --platform linux/arm64 .
 ```
 
-Once the docker build is completed, packages will be copied from the docker build image to a folder named `packages` in the root folder.
+Once the Docker build is completed, packages will be copied from the docker build image to a folder named `packages` in the root folder.
 
 ## Build using cross compiler
 ### Enable multi arch and install build essentials and dependencies
