@@ -23,24 +23,24 @@ With the script you can also download or install all packages of the latest rele
 
 ## Build manually
 ### Install build essentials and dependencies
-```
+```bash
 apt-get install -y --no-install-recommends \
 	build-essential curl ca-certificates sudo git lintian fakeroot \
 	pkg-config libudev-dev libssl-dev libapt-pkg-dev libclang-dev \
 	libpam0g-dev zlib1g-dev nettle-dev
 ```
 ### Install ``rustup``
-```
+```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s
 source ~/.cargo/env
 ```
 
 ### Start build script
-```
+```bash
 ./build.sh 
 ```
 or
-```
+```bash
 ./build.sh client (build only proxmox-backup-client package)
 ```
 
@@ -50,13 +50,13 @@ After that you can find the finished packages in the folder packages/
 ## Build using Docker
 You can build ARM64 .deb packages using the provided Dockerfile and docker buildx:
 
-```
+```bash
 docker buildx build -o packages --platform linux/arm64 .
 ```
 
 You can also set build arguments for base image and build.sh options:
 
-```
+```bash
 docker buildx build -o packages --build-arg buildoptions="client debug" --build-arg baseimage=ubuntu:jammy --platform linux/arm64 .
 ```
 
@@ -66,11 +66,11 @@ Once the Docker build is completed, packages will be copied from the docker buil
 ### Enable multi arch and install build essentials and dependencies
 For cross compiling you need to enable multiarch and install the needed build dependencies for the target architecture. For the tests to work qemu-user-binfmt is needed.
 
-```
+```bash
 dpkg --add-architecture arm64
 ```
 
-```
+```bash
 apt update && apt-get install -y --no-install-recommends \
                 build-essential crossbuild-essential-arm64 curl ca-certificates sudo git lintian \
                 pkg-config libudev-dev:arm64 libssl-dev:arm64 libapt-pkg-dev:arm64 apt:amd64 \
@@ -80,35 +80,36 @@ apt update && apt-get install -y --no-install-recommends \
 (apt:amd64 is necessary because libapt-pkg-dev:arm64 would break the dependencies without it)
 
 ### Install ``rustup`` and add target arch
-```
+```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -sSf | sh -s
 source ~/.cargo/env
 rustup target add aarch64-unknown-linux-gnu
 ```
 
 ### Start build script
-```
+```bash
 ./build.sh cross
 ```
 
 ## Install all needed packages
 ### Server
-```
-sudo apt install ./*.deb
+
+```bash
+sudo apt install ./packages/*.deb
 ```
 
 ### Client
-```
+```bash
 sudo apt install \
-  ./proxmox-backup-client_*_arm64.deb \
-  # Optional: ./proxmox-backup-file-restore_*_arm64.deb
+  ./packages/proxmox-backup-client_*_arm64.deb \
+  # Optional: ./packages/proxmox-backup-file-restore_*_arm64.deb
 ```
 
 ## Help section
 ### Debugging
 you can add the debug option to redirect the complete build process output also to a file (build.log)
 
-```
+```bash
 ./build.sh debug
 ```
 
@@ -116,13 +117,13 @@ you can add the debug option to redirect the complete build process output also 
 
 to see PBS users:
 
-```
+```bash
 proxmox-backup-manager user list
 ```
 
 to update root user pwd:
 
-```
+```bash
 proxmox-backup-manager user update root@pam --password {pwd}
 ```
 
@@ -133,13 +134,13 @@ from https://askubuntu.com/questions/178712/how-to-increase-swap-space/1263160#1
 
 Check swap memory:
 
-```
+```bash
 swapon --show or free -h
 ```
 
 Change swapsize on systems with fstab enabled swap:
 
-```
+```bash
 sudo swapoff /var/swap
 sudo fallocate -l 4G /var/swap
 sudo mkswap /var/swap
@@ -148,7 +149,7 @@ sudo swapon /var/swap
 
 Change swapsize on systems with dphys-swapfile service:
 
-```
+```bash
 sudo sed -i "s#.*CONF_\(SWAPSIZE\|MAXSWAP\)=.*#CONF_\1=4096#" /etc/dphys-swapfile
 sudo service dphys-swapfile restart
 ```
@@ -170,7 +171,7 @@ This switches to the 4k page-size kernel, which is compatible with Proxmox Backu
 As Proxmox source repository does not work for ARM architecture anyway in order to keep underlying Raspberry Pi OS
 up to date by running `apt update && apt upgrade` it is required to comment it out from apt sources.
 
-```
+```bash
 sudo sed -i 's#^Enabled:.*#Enabled: false#g' /etc/apt/sources.list.d/pbs-enterprise.sources
 ```
 
