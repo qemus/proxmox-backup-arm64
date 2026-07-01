@@ -617,14 +617,32 @@ function download_release() {
 }
 
 function install_server() {
+
 	if [ "${#file_list[@]}" -eq 0 ]; then
 		echo "Error: no files found to install" >&2
 		return 1
 	fi
 
-	if ${SUDO} apt-get install -y "${file_list[@]}"; then
-		rm -f -- "${file_list[@]}"
+	# Kernel/header packages are not usable inside a container.
+	if is_container; then
+	    rm -f "${PACKAGES}"/pve-headers_*.deb
+	    rm -f "${PACKAGES}"/proxmox-headers-*.deb
+	    rm -f "${PACKAGES}"/proxmox-default-headers_*.deb
 	fi
+
+	mapfile -t file_list < <(find "${PACKAGES}" -maxdepth 1 -name '*.deb' -print | sort)
+
+	if [ "${#file_list[@]}" -eq 0 ]; then
+		echo "Error: no installable package files found" >&2
+		return 1
+	fi
+
+	if ! ${SUDO} apt-get install -y "${file_list[@]}"; then
+		echo "Error: failed to install downloaded PBS packages" >&2
+		return 1
+	fi
+
+	rm -f -- "${file_list[@]}"
 }
 
 SUDO="${SUDO:-sudo -E}"
