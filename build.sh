@@ -398,7 +398,7 @@ function git_clone_or_fetch() {
 	if [ ! -d "${name}" ]; then
 		git clone "${url}"
 	else
-		git -C "${name}" fetch
+		git -C "${name}" fetch --all --tags --prune
 	fi
 }
 
