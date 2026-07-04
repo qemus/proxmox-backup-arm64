@@ -673,6 +673,7 @@ function install_server() {
 	fi
 
 	remove_uninstallable_packages
+	rm -f "${PACKAGES}"/proxmox-backup-client-static_*.deb
 	mapfile -t file_list < <(find "${PACKAGES}" -maxdepth 1 -name '*.deb' -print | sort)
 
 	if [ "${#file_list[@]}" -eq 0 ]; then
