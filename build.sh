@@ -52,60 +52,6 @@ function get_base() {
 	return 0
 }
 
-function download_package_max_upstream_no_deps() {
-	repo=${1}
-	package_name=${2}
-	required_upstream_version=${3}
-	dest=${4}
-
-	url_base=http://download.proxmox.com/debian/${repo}
-	packages_target=$(get_base "${repo}")
-	version_target=""
-	file_target=""
-	upstream_target=""
-
-	while IFS=';' read -r name version file depends; do
-		[[ "${name}" == "${package_name}" ]] || continue
-		[ -n "${version}" ] || continue
-
-		# Compare by upstream part, so a repository version like 4.2.1-1 is accepted
-		# when the requested source version is 4.2.1, but 4.2.0 or 4.2.2 are not.
-		upstream=${version%%-*}
-		if ! dpkg --compare-versions "${upstream}" = "${required_upstream_version}"; then
-			continue
-		fi
-
-		if [ -z "${version_target}" ] || dpkg --compare-versions "${version}" '>>' "${version_target}"; then
-			version_target=${version}
-			upstream_target=${upstream}
-			file_target=${file}
-		fi
-	done <<<"${packages_target}"
-
-	if [ -z "${file_target}" ]; then
-		echo "Error: package ${package_name} not found in ${repo} with upstream = ${required_upstream_version}" >&2
-		echo "Available ${package_name} versions in ${repo}:" >&2
-		while IFS=';' read -r name version file depends; do
-			[[ "${name}" == "${package_name}" ]] && echo "  ${version}" >&2
-		done <<<"${packages_target}"
-		return 1
-	fi
-
-	echo "Using ${package_name} ${version_target}" >&2
-
-	url=${url_base}/${file_target}
-	file="${dest}/${url##*/}"
-	if [ -e "${file}" ]; then
-		echo "${package_name} ${version_target} up-to-date" >&2
-		echo "${file}"
-		return 0
-	fi
-
-	echo "${package_name} ${version_target} downloading...${url}" >&2
-	curl -sSfL "${url}" -o "${file}"
-	echo "${file}"
-}
-
 function download_arch_all_package_satisfying() {
 	repo=${1}
 	package_name=${2}
@@ -877,7 +823,7 @@ if [ "${BUILD_PACKAGE}" != "client" ]; then
 	fi
 fi
 
-PROXMOX_BACKUP_VER="${PROXMOX_BACKUP_VER:-4.2.1}"
+PROXMOX_BACKUP_VER="${PROXMOX_BACKUP_VER:-4.2.2}"
 PROXMOX_BACKUP_VER="${PROXMOX_BACKUP_VER%%-*}"
 PROXMOX_BACKUP_GIT=""
 PROXMOX_GIT=""
