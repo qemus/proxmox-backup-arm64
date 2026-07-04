@@ -4,4 +4,5 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY . /build/
 WORKDIR /build/packages
 
-RUN apt update && apt -y install ./*.deb ./*static*.deb-
+RUN apt-get update && \
+    apt-get install -y $(printf '%s\n' ./*.deb | grep -v 'static')
