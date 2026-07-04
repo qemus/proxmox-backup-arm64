@@ -55,7 +55,7 @@ function get_base() {
 function download_package_max_upstream_no_deps() {
 	repo=${1}
 	package_name=${2}
-	max_upstream_version=${3}
+	required_upstream_version=${3}
 	dest=${4}
 
 	url_base=http://download.proxmox.com/debian/${repo}
@@ -68,10 +68,10 @@ function download_package_max_upstream_no_deps() {
 		[[ "${name}" == "${package_name}" ]] || continue
 		[ -n "${version}" ] || continue
 
-		# Compare by upstream part, so a repository version like 1.1.2 is accepted
-		# when the requested source version is 1.1.4, but 1.1.5 is not.
+		# Compare by upstream part, so a repository version like 4.2.1-1 is accepted
+		# when the requested source version is 4.2.1, but 4.2.0 or 4.2.2 are not.
 		upstream=${version%%-*}
-		if ! dpkg --compare-versions "${upstream}" le "${max_upstream_version}"; then
+		if ! dpkg --compare-versions "${upstream}" = "${required_upstream_version}"; then
 			continue
 		fi
 
@@ -83,7 +83,7 @@ function download_package_max_upstream_no_deps() {
 	done <<<"${packages_target}"
 
 	if [ -z "${file_target}" ]; then
-		echo "Error: package ${package_name} not found in ${repo} with upstream <= ${max_upstream_version}" >&2
+		echo "Error: package ${package_name} not found in ${repo} with upstream = ${required_upstream_version}" >&2
 		echo "Available ${package_name} versions in ${repo}:" >&2
 		while IFS=';' read -r name version file depends; do
 			[[ "${name}" == "${package_name}" ]] && echo "  ${version}" >&2
@@ -91,11 +91,7 @@ function download_package_max_upstream_no_deps() {
 		return 1
 	fi
 
-	if [ "${upstream_target}" != "${max_upstream_version}" ]; then
-		echo "Warning: using ${package_name} ${version_target}; requested source upstream is ${max_upstream_version}" >&2
-	else
-		echo "Using ${package_name} ${version_target}" >&2
-	fi
+	echo "Using ${package_name} ${version_target}" >&2
 
 	url=${url_base}/${file_target}
 	file="${dest}/${url##*/}"
