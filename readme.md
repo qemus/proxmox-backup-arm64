@@ -98,7 +98,7 @@ rustup target add aarch64-unknown-linux-gnu
 
 ```bash
 cd packages
-sudo apt install ./*.deb ./*static*.deb-
+sudo apt install $(printf '%s\n' ./*.deb | grep -v 'static')
 ```
 
 ### Client
