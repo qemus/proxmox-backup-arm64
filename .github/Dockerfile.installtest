@@ -1,0 +1,7 @@
+FROM debian:trixie-slim
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY . /build/
+WORKDIR /build/packages
+
+RUN apt update && apt-get -y install $(find /build/packages/ -name '*.deb')
