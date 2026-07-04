@@ -395,11 +395,41 @@ function git_clone_or_fetch() {
 	name_git=${url##*/}   # name.git
 	name=${name_git%.git} # name
 
-	if [ ! -d "${name}" ]; then
-		git clone "${url}"
-	else
-		git -C "${name}" fetch --all --tags --prune
-	fi
+	fallback_url=""
+
+	case "${url}" in
+		https://git.proxmox.com/git/*)
+			fallback_url="https://github.com/proxmox/${name}.git"
+			;;
+		https://github.com/proxmox/*)
+			fallback_url="https://git.proxmox.com/git/${name}.git"
+			;;
+	esac
+
+	for repo_url in "${url}" "${fallback_url}"; do
+		[ -n "${repo_url}" ] || continue
+
+		if [ ! -d "${name}" ]; then
+			rm -rf "${name}.tmp"
+
+			if git clone "${repo_url}" "${name}.tmp"; then
+				mv "${name}.tmp" "${name}"
+				return 0
+			fi
+
+			rm -rf "${name}.tmp"
+		else
+			if git -C "${name}" remote set-url origin "${repo_url}" &&
+				git -C "${name}" fetch --all --tags --prune; then
+				return 0
+			fi
+		fi
+
+		echo "Git operation failed for ${repo_url}" >&2
+	done
+
+	echo "Error: failed to clone/fetch ${url}" >&2
+	return 1
 }
 
 function git_clean_and_checkout() {
