@@ -97,7 +97,8 @@ rustup target add aarch64-unknown-linux-gnu
 ### Server
 
 ```bash
-sudo apt install ./packages/*.deb
+cd packages
+sudo apt install ./*.deb ./*static*.deb-
 ```
 
 ### Client
