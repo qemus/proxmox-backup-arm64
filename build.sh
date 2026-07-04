@@ -651,15 +651,11 @@ function download_release() {
 	done
 }
 
-function install_server() {
-
-	if [ "${#file_list[@]}" -eq 0 ]; then
-		echo "Error: no files found to install" >&2
-		return 1
-	fi
+function remove_uninstallable_packages() {
 
 	# Meta/kernel/header packages are not needed for this install and may be
 	# uninstallable on ARM64 because their meta dependencies are unavailable.
+
 	rm -f "${PACKAGES}"/proxmox-backup-meta_*.deb
 	rm -f "${PACKAGES}"/pve-headers_*.deb
 	rm -f "${PACKAGES}"/proxmox-headers-*.deb
@@ -667,7 +663,16 @@ function install_server() {
 	rm -f "${PACKAGES}"/proxmox-kernel-*.deb
 	rm -f "${PACKAGES}"/proxmox-kernel-helper_*.deb
 	rm -f "${PACKAGES}"/proxmox-default-kernel_*.deb
+}
 
+function install_server() {
+
+	if [ "${#file_list[@]}" -eq 0 ]; then
+		echo "Error: no files found to install" >&2
+		return 1
+	fi
+
+	remove_uninstallable_packages
 	mapfile -t file_list < <(find "${PACKAGES}" -maxdepth 1 -name '*.deb' -print | sort)
 
 	if [ "${#file_list[@]}" -eq 0 ]; then
@@ -1144,6 +1149,9 @@ if [ ! -e "${PACKAGES}/proxmox-mini-journalreader_${PROXMOX_JOURNALREADER_VER}_$
 else
 	echo "proxmox-mini-journalreader up-to-date"
 fi
+
+# Remove uninstallable packages from output
+remove_uninstallable_packages
 
 # Remove debug symbol packages from output directory.
 rm -f "${PACKAGES}"/*-dbgsym_*.deb "${PACKAGES}"/*.ddeb
