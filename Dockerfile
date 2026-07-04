@@ -1,5 +1,7 @@
+# syntax=docker/dockerfile:1
+
 ARG baseimage=debian:trixie-slim
-FROM ${baseimage} as builder-stage
+FROM ${baseimage} AS builder-stage
 
 ARG buildoptions
 
