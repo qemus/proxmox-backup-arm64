@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
   set -eu
 
-  apt update
+  apt-get update
   apt-get install -y --no-install-recommends \
     build-essential \
     curl \
