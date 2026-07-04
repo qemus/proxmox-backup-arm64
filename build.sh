@@ -582,7 +582,22 @@ function download_release() {
 		curl -sSfL "${release_url}" |
 			jq -r '
 				.assets[]
-				| select(.name | test("static|dbgsym") | not)
+				| select(
+					.name as $name
+					| [
+						"static",
+						"dbgsym",
+						"pve-headers",
+						"proxmox-headers",
+						"proxmox-default-headers",
+						"proxmox-kernel-",
+						"proxmox-kernel-helper_",
+						"proxmox-default-kernel_",
+						"proxmox-backup-meta_"
+					]
+					| any(. as $skip; $name | contains($skip))
+					| not
+				)
 				| .browser_download_url
 			'
 	)
@@ -593,23 +608,13 @@ function download_release() {
 	fi
 
 	for download_url in "${download_urls[@]}"; do
-
 		file=$(basename "${download_url}")
-		
+
 		if [ -e "${PACKAGES}/${file}" ]; then
 			echo "${file} already exists"
 		else
 			echo "Downloading ${file}"
 			curl -sSfL "${download_url}" -o "${PACKAGES}/${file}"
-		fi
-
-        [[ "$file" == *"dbgsym"* ]] && rm "${PACKAGES}/${file}" && continue
-
-        if is_container; then
-            [[ "$file" == "proxmox-kernel-"* ]] && rm "${PACKAGES}/${file}" && continue
-			[[ "$file" == "proxmox-backup-meta"* ]] && rm "${PACKAGES}/${file}" && continue
-	    	[[ "$file" == "proxmox-kernel-helper"* ]] && rm "${PACKAGES}/${file}" && continue
-		    [[ "$file" == "proxmox-default-kernel"* ]] && rm "${PACKAGES}/${file}" && continue
 		fi
 
 		file_list+=("${PACKAGES}/${file}")
@@ -623,12 +628,15 @@ function install_server() {
 		return 1
 	fi
 
-	# Kernel/header packages are not usable inside a container.
-	if is_container; then
-	    rm -f "${PACKAGES}"/pve-headers_*.deb
-	    rm -f "${PACKAGES}"/proxmox-headers-*.deb
-	    rm -f "${PACKAGES}"/proxmox-default-headers_*.deb
-	fi
+	# Meta/kernel/header packages are not needed for this install and may be
+	# uninstallable on ARM64 because their meta dependencies are unavailable.
+	rm -f "${PACKAGES}"/proxmox-backup-meta_*.deb
+	rm -f "${PACKAGES}"/pve-headers_*.deb
+	rm -f "${PACKAGES}"/proxmox-headers-*.deb
+	rm -f "${PACKAGES}"/proxmox-default-headers_*.deb
+	rm -f "${PACKAGES}"/proxmox-kernel-*.deb
+	rm -f "${PACKAGES}"/proxmox-kernel-helper_*.deb
+	rm -f "${PACKAGES}"/proxmox-default-kernel_*.deb
 
 	mapfile -t file_list < <(find "${PACKAGES}" -maxdepth 1 -name '*.deb' -print | sort)
 
@@ -996,7 +1004,6 @@ for deb in "${pbs_runtime_debs[@]}"; do
 done
 
 download_runtime_arch_all_dependencies "${pbs_runtime_debs[@]}"
-download_runtime_arch_all_dependency proxmox-kernel-helper "" "" "${PACKAGES}" >/dev/null || true
 
 PVE_XTERMJS_VER="$(latest_package_version pve pve-xtermjs)"
 
