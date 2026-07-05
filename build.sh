@@ -153,6 +153,8 @@ function parse_deb_runtime_dependencies() {
 	done < <(printf '%s
 ' "${fields}" | tr ',' '
 ')
+
+return 0
 }
 
 function download_runtime_arch_all_dependencies() {
@@ -190,6 +192,8 @@ function download_runtime_arch_all_dependencies() {
 			fi
 		done < <(parse_deb_runtime_dependencies "${deb}")
 	done
+
+	return 0
 }
 
 function dependency_constraint_from_deb() {
@@ -504,6 +508,8 @@ function select_package() {
 		url=${url_base}/${file_target}
 		echo "${url}"
 	fi
+
+	return 0
 }
 
 function set_package_info() {
@@ -513,6 +519,8 @@ function set_package_info() {
 	else
 		sed -i "s#^\(Maintainer.*\)\$#\1\nOrigin: https://github.com/qemus/proxmox-backup-arm64#" debian/control
 	fi
+
+	return 0
 }
 
 resolve_rust_crate_commit() {
@@ -590,6 +598,8 @@ function download_release() {
 
 		file_list+=("${PACKAGES}/${file}")
 	done
+
+	return 0
 }
 
 function remove_uninstallable_packages() {
@@ -604,6 +614,8 @@ function remove_uninstallable_packages() {
 	rm -f "${PACKAGES}"/proxmox-kernel-*.deb
 	rm -f "${PACKAGES}"/proxmox-kernel-helper_*.deb
 	rm -f "${PACKAGES}"/proxmox-default-kernel_*.deb
+
+	return 0
 }
 
 function install_server() {
@@ -628,6 +640,8 @@ function install_server() {
 	fi
 
 	rm -f -- "${file_list[@]}"
+
+	return 0
 }
 
 SUDO="${SUDO:-sudo -E}"
