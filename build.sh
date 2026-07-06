@@ -31,8 +31,13 @@ function download_package() {
 	fi
 
 	echo "${package} downloading...${url}" >&2
-	curl -sSfL "${url}" -o "${file}"
-	echo "${file}"
+
+    if ! curl -sSfL "${url}" -o "${file}"; then
+        echo "Error: failed to download ${package} from ${url}" >&2
+        return 1
+    fi
+
+    echo "${file}"
 }
 
 function get_base() {
@@ -95,8 +100,13 @@ function download_arch_all_package_satisfying() {
 	fi
 
 	echo "${package_name} ${version_target} downloading runtime dependency...${url}" >&2
-	curl -sSfL "${url}" -o "${file}"
-	echo "${file}"
+
+    if ! curl -sSfL "${url}" -o "${file}"; then
+        echo "Error: failed to download ${package_name} from ${url}" >&2
+        return 1
+    fi
+
+    echo "${file}"
 }
 
 function download_runtime_arch_all_dependency() {
