@@ -554,13 +554,6 @@ resolve_rust_crate_commit() {
   return 1
 }
 
-function is_container() {
-	[ -f /.dockerenv ] ||
-	[ -f /run/.containerenv ] ||
-	[ -e /dev/.buildkit_qemu_emulator ] ||
-	grep -qaE '(docker|containerd|kubepods|libpod|buildkit)' /proc/1/cgroup 2>/dev/null
-}
-
 file_list=()
 function download_release() {
 	version=${1:-latest}
@@ -603,8 +596,11 @@ function download_release() {
 			echo "${file} already exists"
 		else
 			echo "Downloading ${file}"
-			curl -sSfL "${download_url}" -o "${PACKAGES}/${file}"
-		fi
+            if ! curl -sSfL "${download_url}" -o "${PACKAGES}/${file}"; then
+              echo "Error: failed to download release from $url" >&2
+              return 1
+            fi
+        fi
 
 		file_list+=("${PACKAGES}/${file}")
 	done
