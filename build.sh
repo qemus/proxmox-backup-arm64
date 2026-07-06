@@ -597,10 +597,10 @@ function download_release() {
 		else
 			echo "Downloading ${file}"
             if ! curl -sSfL "${download_url}" -o "${PACKAGES}/${file}"; then
-              echo "Error: failed to download release from $url" >&2
-              return 1
-            fi
-        fi
+                echo "Error: failed to download release from $download_url" >&2
+                return 1
+			fi
+		fi
 
 		file_list+=("${PACKAGES}/${file}")
 	done
