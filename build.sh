@@ -935,7 +935,8 @@ EOF
 sed -i '/dh-cargo\|cargo:native\|rustc:native\|librust-/d' proxmox-backup/debian/control
 sed -i 's/\(latexmk\|proxmox-widget-toolkit-dev\|python3-sphinx\)/\1:all/' proxmox-backup/debian/control
 sed -i '/patch.crates-io/,/pxar/s/^#//' proxmox-backup/Cargo.toml
-
+sed -i '/patch.crates-io/aproxmox-syslog-api = { path = "../proxmox/proxmox-syslog-api" }' proxmox-backup/Cargo.toml
+	
 patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-build.patch"
 
 if [ "${BUILD_PACKAGE}" = "client" ]; then
