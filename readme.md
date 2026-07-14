@@ -6,8 +6,6 @@
 
 Script for building Proxmox Backup Server **4.x** for ARM64.
 
-At least 4 GB are required for compiling. On devices with low memory, SWAP must be used (see Help section).
-
 For an easier experience, you can also use the [Backup Server Docker container](https://github.com/dockur/proxmox-backup), which includes these same packages.
 
 ## Download pre-built packages
@@ -24,6 +22,9 @@ With the script you can also download or install all packages of the latest rele
 `./build.sh download` or a specific version `./build.sh download=4.2.2`
 
 ## Build manually
+
+At least 4 GB are required for compiling. On devices with low memory, SWAP must be used (see Help section).
+
 ### Install build essentials and dependencies
 ```bash
 apt-get install -y --no-install-recommends \
