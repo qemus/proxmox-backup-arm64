@@ -6,10 +6,8 @@
 
 Script for building Proxmox Backup Server **4.x** for ARM64.
 
-For an easier experience, you can also use the [Backup Server Docker container](https://github.com/dockur/proxmox-backup), which includes these same packages.
-
 ## Download pre-built packages
-You can find unoffical Debian packages that are created with this script at [https://github.com/qemus/proxmox-backup-arm64/releases](https://github.com/qemus/proxmox-backup-arm64/releases).
+You can find unoffical Debian packages that are created with this script in the  [Releases](https://github.com/qemus/proxmox-backup-arm64/releases) section.
 
 With the script you can also download or install all packages of the latest release automatically.
 
@@ -20,6 +18,8 @@ With the script you can also download or install all packages of the latest rele
 **Download only**
 
 `./build.sh download` or a specific version `./build.sh download=4.2.2`
+
+For an even easier experience, you can also use the [Backup Server Docker container](https://github.com/dockur/proxmox-backup), which is built on top of these same packages.
 
 ## Build manually
 
