@@ -757,11 +757,11 @@ fi
 
 echo "Download packages list from proxmox devel repository"
 PACKAGES_DEVEL=$(load_packages http://download.proxmox.com/debian/devel/dists/trixie/main/binary-amd64/Packages.gz)
+
 echo "Download packages list from pbs repositories"
-PACKAGES_PBS="$(
-	load_packages http://download.proxmox.com/debian/pbs/dists/trixie/pbs-test/binary-amd64/Packages.gz
-	load_packages http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/Packages.gz
-)"
+PACKAGES_PBS=$(load_packages \
+	http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/Packages.gz)
+
 echo "Download packages list from PVE repository"
 PACKAGES_PVE=$(load_packages http://download.proxmox.com/debian/pve/dists/trixie/pve-no-subscription/binary-amd64/Packages.gz)
 
