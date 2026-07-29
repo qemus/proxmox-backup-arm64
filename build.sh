@@ -941,6 +941,13 @@ patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-build.patch"
 
 if [ "${BUILD_PACKAGE}" = "client" ]; then
 	sed -i '/proxmox-biome/d' proxmox-backup/debian/control
+	sed -i \
+			-e 's/python3-sphinx:all <!nodoc>/python3-sphinx:all/' \
+			-e '/^Package: proxmox-backup-server$/,/^Package: proxmox-backup-client$/{
+				/^Package: proxmox-backup-client$/!d
+			}' \
+			-e '/^Package: proxmox-backup-docs$/,$d' \
+			proxmox-backup/debian/control
 	patch -p1 -d proxmox-backup/ <"${PATCHES}/proxmox-backup-client.patch"
 fi
 	
