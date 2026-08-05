@@ -332,20 +332,6 @@ function download_package_latest() {
 	download_package "${repo}" "${package}" "${version}" "${dest}"
 }
 
-function resolve_commit_for_debian_version() {
-	version=${1}
-	repo_path=${2}
-	package_name=${3:-}
-
-	# Compatibility wrapper. The generic package resolver handles tags,
-	# root changelogs, and nested */debian/changelog files.
-	if [ -n "${package_name}" ]; then
-		resolve_commit_for_package_version "${version}" "${repo_path}" "${package_name}"
-	else
-		resolve_commit_for_package_version "${version}" "${repo_path}" ""
-	fi
-}
-
 function git_clone_or_fetch() {
 	url=${1}              # url/name.git
 	name_git=${url##*/}   # name.git
@@ -756,7 +742,7 @@ fi
 [ ! -d "${PACKAGES_BUILD}" ] && mkdir -p "${PACKAGES_BUILD}"
 
 echo "Download packages list from proxmox devel repository"
-PACKAGES_DEVEL=$(load_packages http://download.proxmox.com/debian/devel/dists/trixie/main/binary-amd64/Packages.gz)
+PACKAGES_DEVEL=$(load_packages http://download.proxmox.com/debian/devel/dists/trixie/main/binary-${HOST_ARCH}/Packages.gz)
 
 echo "Download packages list from pbs repositories"
 PACKAGES_PBS=$(load_packages \
@@ -780,6 +766,7 @@ if [ "${BUILD_PACKAGE}" = "server" ]; then
 	    "${libjs_qrcodejs}"
 		"${proxmox_widget_toolkit}"
 		"$(download_package_latest devel proxmox-widget-toolkit-dev "${PACKAGES_BUILD}")"
+		"$(download_package_latest devel proxmox-biome "${PACKAGES_BUILD}")"
 	)
 fi
 
@@ -789,58 +776,6 @@ if [ "${#packages_install[@]}" -gt 0 ]; then
 fi
 
 cd "${SOURCES}"
-
-if [ "${BUILD_PACKAGE}" != "client" ]; then
-
-	PROXMOX_BIOME_VER="$(latest_package_version devel proxmox-biome)"
-	echo "Using proxmox-biome package version: ${PROXMOX_BIOME_VER}"
-
-	BIOME_ARCH="${PACKAGE_ARCH}"
-	if [[ "${BUILD_PROFILES}" =~ cross ]]; then
-		BIOME_ARCH="${HOST_ARCH}"
-	fi
-
-	if [ "${BIOME_ARCH}" = "amd64" ]; then
-		download_package devel proxmox-biome "${PROXMOX_BIOME_VER}" "${PACKAGES_BUILD}" || true
-	fi
-
-	if [ ! -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb" ]; then
-	
-		git_clone_or_fetch https://git.proxmox.com/git/proxmox-biome.git
-		PROXMOX_BIOME_GIT=$(resolve_commit_for_debian_version "${PROXMOX_BIOME_VER}" proxmox-biome proxmox-biome || true)
-
-		if [ -z "${PROXMOX_BIOME_GIT}" ]; then
-			echo "Error: could not resolve proxmox-biome commit for version ${PROXMOX_BIOME_VER}" >&2
-			exit 1
-		fi
-
-		echo "Using proxmox-biome commit: ${PROXMOX_BIOME_GIT}"
-		git_clean_and_checkout "${PROXMOX_BIOME_GIT}" proxmox-biome
-
-		patch -p1 -d proxmox-biome/ <"${PATCHES}/proxmox-biome-build.patch"
-
-		if [ "${BIOME_ARCH}" = "arm64" ]; then
-			patch -p1 -d proxmox-biome/ <"${PATCHES}/proxmox-biome-arm.patch"
-		fi
-
-		cd proxmox-biome
-		set_package_info
-		${SUDO} apt -y build-dep .
-		env -i HOME="${HOME}" TERM="${TERM}" bash -c \
-			'source /etc/profile; source ~/.cargo/env; make deb'
-		mv -f proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb "${PACKAGES_BUILD}"
-		cd ..
-	else
-		echo "proxmox-biome up-to-date"
-	fi
-
-	if [ -e "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb" ]; then
-		${SUDO} apt install -y "${PACKAGES_BUILD}/proxmox-biome_${PROXMOX_BIOME_VER}_${BIOME_ARCH}.deb"
-	else
-		echo "proxmox-biome dependency missing"
-		exit 1
-	fi
-fi
 
 PROXMOX_BACKUP_VER="${PROXMOX_BACKUP_VER:-4.2.2}"
 PROXMOX_BACKUP_VER="${PROXMOX_BACKUP_VER%%-*}"
