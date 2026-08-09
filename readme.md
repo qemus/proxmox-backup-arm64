@@ -13,17 +13,15 @@ With the script you can also download or install all packages of the latest rele
 
 **Download and install**
 
- `./build.sh install` or a specific version `./build.sh install=4.2.2`
+ `./build.sh install` or a specific version `./build.sh install=4.2.5`
 
 **Download only**
 
-`./build.sh download` or a specific version `./build.sh download=4.2.2`
+`./build.sh download` or a specific version `./build.sh download=4.2.5`
 
 For an even easier experience, you can also use the [Backup Server Docker container](https://github.com/dockur/proxmox-backup), which is built on top of these same packages.
 
 ## Build manually
-
-At least 4 GB are required for compiling. On devices with low memory, SWAP must be used (see Help section).
 
 ### Install build essentials and dependencies
 ```bash
@@ -132,63 +130,6 @@ proxmox-backup-manager user update root@pam --password {pwd}
 ```
 
 more info: https://pbs.proxmox.com/docs/user-management.html
-
-### Create SWAP (at least 4G on low memory systems like Raspberry PI)
-from https://askubuntu.com/questions/178712/how-to-increase-swap-space/1263160#1263160
-
-Check swap memory:
-
-```bash
-swapon --show or free -h
-```
-
-Change swapsize on systems with fstab enabled swap:
-
-```bash
-sudo swapoff /var/swap
-sudo fallocate -l 4G /var/swap
-sudo mkswap /var/swap
-sudo swapon /var/swap
-```
-
-Change swapsize on systems with dphys-swapfile service:
-
-```bash
-sudo sed -i "s#.*CONF_\(SWAPSIZE\|MAXSWAP\)=.*#CONF_\1=4096#" /etc/dphys-swapfile
-sudo service dphys-swapfile restart
-```
-
-### 400 Bad Request on Raspberry Pi 5 (https://github.com/wofferl/proxmox-backup-arm64/issues/40)
-
-To fix the 400 Bad Request error on Raspberry Pi 5:
-
-1. Edit `/boot/firmware/config.txt` on the host system
-2. Add the following line at the end: `kernel=kernel8.img`
-3. Reboot the Raspberry Pi
-
-This switches to the 4k page-size kernel, which is compatible with Proxmox Backup Server.
-
-**Technical explanation:** The Raspberry Pi 5's default kernel uses 16k page-size, which is incompatible with Proxmox Backup Server.
-
-### Raspberry Pi OS `apt update && apt upgrade` failing (https://github.com/wofferl/proxmox-backup-arm64/issues/60)
-
-As Proxmox source repository does not work for ARM architecture anyway in order to keep underlying Raspberry Pi OS
-up to date by running `apt update && apt upgrade` it is required to comment it out from apt sources.
-
-```bash
-sudo sed -i 's#^Enabled:.*#Enabled: false#g' /etc/apt/sources.list.d/pbs-enterprise.sources
-```
-
-/etc/apt/sources.list.d/pbs-enterprise.sources
-
-```
-Types: deb
-URIs: https://enterprise.proxmox.com/debian/pbs
-Suites: trixie
-Components: pbs-enterprise
-Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
-Enabled: false
-```
 
 ## Acknowledgements
 
