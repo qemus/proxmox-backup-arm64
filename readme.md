@@ -1,8 +1,11 @@
-# proxmox-backup-arm64
-
+<h1 align="center">proxmox-backup-arm64<br />
+<div align="center">
+  
 [![Build]][build_url]
 [![Version]][release_url]
 [![Size]][release_url]
+
+</div></h1>
 
 Script for building Proxmox Backup Server **4.x** for ARM64.
 
