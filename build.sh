@@ -907,9 +907,9 @@ export DEB_VERSION_UPSTREAM=$(dpkg-parsechangelog -SVersion | cut -d- -f1)
 
 echo "Building PBS package..."
 
-# proxmox-backup 4.2.5 contains a unit test that uses proxmox-product-config
+# proxmox-backup 4.2.x contains a unit test that uses proxmox-product-config
 # before initializing it. Skip that known-broken test suite for this version only.
-if [[ "${PROXMOX_BACKUP_VER}" == "4.2.4" || "${PROXMOX_BACKUP_VER}" == "4.2.5" ]]; then
+if [[ "${PROXMOX_BACKUP_VER}" == "4.2."* ]]; then
     if [[ " ${DEB_BUILD_OPTIONS:-} " != *" nocheck "* ]]; then
 	    echo "Skipping tests for proxmox-backup ${PROXMOX_BACKUP_VER} due to an upstream product config initialization regression."
 	    export DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS:+${DEB_BUILD_OPTIONS} }nocheck"
